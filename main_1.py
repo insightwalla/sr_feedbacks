@@ -1,6 +1,6 @@
 import streamlit as st
 import base64
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", initial_sidebar_state='expanded')
 
 query = '''
 select
@@ -70,12 +70,22 @@ class GoogleBigQuery:
 
 data = GoogleBigQuery().query(query)
 
+
+st.sidebar.title('Reservation Feedbacks')
 # transform data
 data['received_date'] = pd.to_datetime(data['received_date'], dayfirst=True, format = 'mixed')
 # filter data by date
 start_date = st.sidebar.date_input('Start date', value=data['received_date'].min())
 end_date = st.sidebar.date_input('End date', value=data['received_date'].max())
+# get unique venues
+venues =  data['venue'].unique().tolist() + ['All']
+venue = st.sidebar.selectbox('Select venue', venues, index=len(venues)-1)
 
+if venue != 'All':
+    data = data[data['venue'] == venue]
+
+
+st.subheader(f'**{venue}** - {start_date} {end_date}')
 # transform data
 start_date = pd.to_datetime(start_date)
 end_date = pd.to_datetime(end_date)
@@ -83,19 +93,16 @@ end_date = pd.to_datetime(end_date)
 data = data[(data['received_date'] >= start_date) & (data['received_date'] <= end_date)]
 
 st.write(data)
-st.write(data.shape)
+st.write(f'{len(data)} reviews')
 
 
 # create a download button
-
-def get_table_download_link(df):
-    """Generates a link allowing the data in a given panda dataframe to be downloaded
-    in:  dataframe
-    out: href string
-    """
-    csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
-    return f'<a href="data:file/csv;base64,{b64}" download="feedback.csv">Download csv file</a>'
-
-st.markdown(get_table_download_link(data), unsafe_allow_html=True)
-
+c1,c2 = st.columns(2)
+st.sidebar.text_input('Rename your file', value=f'{venue} - {start_date.date()} {end_date.date()}', key='filename')
+st.sidebar.download_button(
+    label="Download data as CSV",
+    data=data.to_csv().encode("utf-8"),
+    file_name='data.csv',
+    mime='text/csv',
+    use_container_width=True
+)
