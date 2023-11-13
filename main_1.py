@@ -29,9 +29,8 @@ def adding_data():
     # create a st.date_input
     st.write(str(start_date),' / ', str(end_date))
     # as d/m/y
-    start_date = start_date.strftime('%m/%d/%Y')
-    end_date = end_date.strftime('%m/%d/%Y')
-    # select the venues
+    start_date = pd.to_datetime(start_date).strftime('%Y-%m-%d')
+    end_date = pd.to_datetime(end_date).strftime('%Y-%m-%d')
 
     venues = {
         'Dishoom Covent Garden': '`jp-gs-379412.sevenrooms_covent_garden.reservation_feedback`' ,
@@ -57,8 +56,8 @@ def adding_data():
             from
                 {venues[venue]}
             where
-                reservation_date >= '{start_date}'
-                and reservation_date <= '{end_date}'
+                parse_date('%d/%m/%Y', reservation_date) >= '{start_date}'
+                and parse_date('%d/%m/%Y', reservation_date) <= '{end_date}'
             '''
         else:
             query = ''
@@ -72,10 +71,9 @@ def adding_data():
                 from
                     {v}
                 where
-                    reservation_date >= '{start_date}'
-                    and reservation_date <= '{end_date}'
+                    parse_date('%d/%m/%Y', reservation_date) >= '{start_date}'
+                    and parse_date('%d/%m/%Y', reservation_date) <= '{end_date}'
                 '''
-
         submit = st.form_submit_button(f'Fetch **{venue}** (**{start_date}** - **{end_date}**)', use_container_width=True, type='primary')
         if submit:
             with st.spinner('Fetching data...'):
