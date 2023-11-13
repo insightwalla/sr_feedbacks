@@ -56,8 +56,8 @@ def adding_data():
             from
                 {venues[venue]}
             where
-                parse_date('%d/%m/%Y', reservation_date) >= '{start_date}'
-                and parse_date('%d/%m/%Y', reservation_date) <= '{end_date}'
+                parse_date('%d/%m/%Y', received_date) >= '{start_date}'
+                and parse_date('%d/%m/%Y', received_date) <= '{end_date}'
             '''
         else:
             query = ''
@@ -71,8 +71,8 @@ def adding_data():
                 from
                     {v}
                 where
-                    parse_date('%d/%m/%Y', reservation_date) >= '{start_date}'
-                    and parse_date('%d/%m/%Y', reservation_date) <= '{end_date}'
+                    parse_date('%d/%m/%Y', received_date) >= '{start_date}'
+                    and parse_date('%d/%m/%Y', received_date) <= '{end_date}'
                 '''
         submit = st.form_submit_button(f'Fetch **{venue}** (**{start_date}** - **{end_date}**)', use_container_width=True, type='primary')
         if submit:
